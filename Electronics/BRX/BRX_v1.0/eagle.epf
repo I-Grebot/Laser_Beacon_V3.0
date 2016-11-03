@@ -1,0 +1,37 @@
+[Eagle]
+Version="06 02 00"
+Platform="Windows"
+Serial="6F24B2090F-LS-WLM-3CP"
+Globals="Globals"
+Desktop="Desktop"
+
+[Globals]
+AutoSaveProject=1
+UsedLibrary="C:/Program Files (x86)/EAGLE-6.2.0/lbr/supply1.lbr"
+UsedLibrary="C:/Program Files (x86)/EAGLE-6.2.0/lbr/supply2.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/LilyPad-Wearables.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-Aesthetics.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-DigitalIC.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-AnalogIC.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-Boards.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-Connectors.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-DiscreteSemi.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-Displays.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-Electromechanical.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-FreqCtrl.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-LED.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-Passives.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-PowerIC.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-RF.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/SparkFun/SparkFun-Eagle-Libraries/SparkFun-Sensors.lbr"
+UsedLibrary="C:/Users/Paul/Documents/Work/Libraries/MPnet/lib_paul_v6.lbr"
+
+[Win_1]
+Type="Control Panel"
+Loc="402 176 1514 809"
+State=2
+Number=0
+
+[Desktop]
+Screen="1680 1050"
+Window="Win_1"
