@@ -150,13 +150,13 @@ int main(void) {
   if(wdt_occured()) {
     printf("Error: reset because of watch-dog!\n", err_code);
     led_set_red(LED_BLINK_S2);
-    can_state = CAN_NODE_STATE_BEACON_BTX_ERROR ;
+    can_state = CAN_NODE_STATE_ERROR ;
   }
 
   if(err_code) {
     printf("Error with initialization: code %d\n", err_code);
     led_set_red(LED_BLINK_S2);
-    can_state = CAN_NODE_STATE_BEACON_BTX_ERROR ;
+    can_state = CAN_NODE_STATE_ERROR ;
   }
 
   //can_printf("Hello from BTX!\n");
@@ -192,7 +192,7 @@ int main(void) {
           // Only if not already running and only if allowed to
           if(!drum_running && can_turret_cmd) {
             drum_motor_start();
-            can_state = CAN_NODE_STATE_BEACON_BTX_READY ;
+            can_state = CAN_NODE_STATE_READY ;
             
           }
           
