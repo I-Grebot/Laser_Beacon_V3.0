@@ -44,7 +44,7 @@
 // -----------------------------------------------------------------------------
 // CONFIGURATION
 // -----------------------------------------------------------------------------
-
+/*
 // Oscillator startup configuration, on internal fast RC
 _FOSCSEL(FNOSC_FRC);
 
@@ -55,6 +55,59 @@ _FOSC(POSCMD_HS & OSCIOFNC_OFF & IOL1WAY_OFF & FCKSM_CSECME);
 // Watchdog is enabled/disabled by software control
 // When used, the WDT period is 256ms (8192 / 32kHz)
 _FWDT(FWDTEN_OFF & WDTPOST_PS8192);
+ */ //old configuration method to be removed here for historical reason JST
+
+// DSPIC33FJ128MC804 Configuration Bit Settings
+
+// 'C' source line config statements
+
+// FBS
+#pragma config BWRP = WRPROTECT_OFF     // Boot Segment Write Protect (Boot Segment may be written)
+#pragma config BSS = NO_FLASH           // Boot Segment Program Flash Code Protection (No Boot program Flash segment)
+#pragma config RBS = NO_RAM             // Boot Segment RAM Protection (No Boot RAM)
+
+// FSS
+#pragma config SWRP = WRPROTECT_OFF     // Secure Segment Program Write Protect (Secure segment may be written)
+#pragma config SSS = NO_FLASH           // Secure Segment Program Flash Code Protection (No Secure Segment)
+#pragma config RSS = NO_RAM             // Secure Segment Data RAM Protection (No Secure RAM)
+
+// FGS
+#pragma config GWRP = OFF               // General Code Segment Write Protect (User program memory is not write-protected)
+#pragma config GSS = OFF                // General Segment Code Protection (User program memory is not code-protected)
+
+// FOSCSEL
+#pragma config FNOSC = FRC              // Oscillator Mode (Internal Fast RC (FRC))
+#pragma config IESO = ON                // Internal External Switch Over Mode (Start-up device with FRC, then automatically switch to user-selected oscillator source when ready)
+
+// FOSC
+#pragma config POSCMD = HS              // Primary Oscillator Source (HS Oscillator Mode)
+#pragma config OSCIOFNC = OFF           // OSC2 Pin Function (OSC2 pin has clock out function)
+#pragma config IOL1WAY = OFF            // Peripheral Pin Select Configuration (Allow Multiple Re-configurations)
+#pragma config FCKSM = CSECME           // Clock Switching and Monitor (Both Clock Switching and Fail-Safe Clock Monitor are enabled)
+
+// FWDT
+#pragma config WDTPOST = PS8192         // Watchdog Timer Postscaler (1:8,192)
+#pragma config WDTPRE = PR128           // WDT Prescaler (1:128)
+#pragma config WINDIS = OFF             // Watchdog Timer Window (Watchdog Timer in Non-Window mode)
+#pragma config FWDTEN = OFF             // Watchdog Timer Enable (Watchdog timer enabled/disabled by user software)
+
+// FPOR
+#pragma config FPWRT = PWR128           // POR Timer Value (128ms)
+#pragma config ALTI2C = OFF             // Alternate I2C  pins (I2C mapped to SDA1/SCL1 pins)
+#pragma config LPOL = ON                // Motor Control PWM Low Side Polarity bit (PWM module low side output pins have active-high output polarity)
+#pragma config HPOL = ON                // Motor Control PWM High Side Polarity bit (PWM module high side output pins have active-high output polarity)
+#pragma config PWMPIN = ON              // Motor Control PWM Module Pin Mode bit (PWM module pins controlled by PORT register at device Reset)
+
+// FICD
+#pragma config ICS = PGD1               // Comm Channel Select (Communicate on PGC1/EMUC1 and PGD1/EMUD1)
+#pragma config JTAGEN = OFF             // JTAG Port Enable (JTAG is Disabled)
+
+// #pragma config statements should precede project file includes.
+// Use project enums instead of #define for ON and OFF.
+
+#include <xc.h>
+#include <stdio.h>
+
 
 // -----------------------------------------------------------------------------
 // GLOBALS
@@ -66,14 +119,15 @@ extern uint16_t tick_cnt;
 // Current drum and control speeds in rp/s
 extern uint8_t drum_running;
 extern float current_speed_rps;
-extern float drum_control_rps ;
+extern float drum_control_rps;
 
 // CAN control defined in another module
-extern uint8_t can_match_state ;
-extern uint8_t can_turret_cmd ;
+extern uint8_t can_match_state;
+#warning "can_match_state updated no where"
+extern uint8_t can_turret_cmd;
 
 // CAN state defined in another module
-extern uint8_t can_state ;
+extern uint8_t can_state;
 
 // Software IRQ
 uint8_t sw_irq;
@@ -90,26 +144,29 @@ char can_msg[DEBUG_CAN_MSG_MAX];
 // -----------------------------------------------------------------------------
 
 // Setup an UART, with the decicated baudrate
-inline void uart_debug_setup(void)
-{
-    DEBUG_UART_RX_TRIS = 1 ; // DEBUG UART RX as input
-    DEBUG_UART_TX_TRIS = 0 ; // DEBUG UART TX as output
+
+inline void uart_debug_setup(void) {
+    setbuf(stdout, NULL); //no buffered output
+            
+    DEBUG_UART_RX_TRIS = 1; // DEBUG UART RX as input
+    DEBUG_UART_TX_TRIS = 0; // DEBUG UART TX as output
     DEBUG_UART_RX_RPN = DEBUG_UART_RX_PIN;
     DEBUG_UART_TX_RPN = DEBUG_UART_TX_PIN;
 
     U1MODEbits.STSEL = 0; // 1 stop bit
     U1MODEbits.PDSEL = 0; // No parity, 8 data bit
     U1MODEbits.ABAUD = 0; // Auto-baud disabled
-    U1MODEbits.BRGH  = 0; // Low-speed mode
-    U1BRG = DEBUG_UART_BRG;    // Baud-rate config
+    U1MODEbits.BRGH = 0; // Low-speed mode
+    U1BRG = DEBUG_UART_BRG; // Baud-rate config
 
-    U1MODEbits.UARTEN = 1;// Enable UART
-    U1STAbits.UTXEN = 1;  // Enable TX on UART
+    U1MODEbits.UARTEN = 1; // Enable UART
+    U1STAbits.UTXEN = 1; // Enable TX on UART
 
     // Configure UART1 RX ISR
-    IFS0bits.U1RXIF = 0 ; // Clear interrupt
-    IPC2bits.U1RXIP = 1 ; // Set priority to 1 (low)
-    IEC0bits.U1RXIE = 1 ; // Enable interrupt
+    //IFS0bits.U1RXIF = 0; // Clear interrupt
+    //IPC2bits.U1RXIP = 1; // Set priority to 1 (low)
+    //IEC0bits.U1RXIE = 1; // Enable interrupt
+#warning "TODO debug why Rx ISR fires always, code shall work with and without TTL232R"
 
 }
 
@@ -119,132 +176,145 @@ inline void uart_debug_setup(void)
 
 int main(void) {
 
-  uint8_t err_code ;
-  
-  // Oscillator needs to be started first
-  osc_init();
+    uint8_t err_code;
 
-  // All I/Os are digital by default
-  ADPCFG = 0xFFFF;
-  AD1PCFGL = 0xFFFF;
+    // Oscillator needs to be started first
+    osc_init();
+    wdt_stop(); //to simplify debug (this is normal case after POR)
 
-  // Modules initializations
-  led_init();
-  uart_debug_setup();
-  err_code = beacon_com_init();  
-  drum_control_init();
-  //power_modulation_init();
+    // All I/Os are digital by default
+    //ADPCFG = 0xFFFF; => links same register as AD1PCFGL => to be removed
+    AD1PCFGL = 0xFFFF;
 
-  // Initiate the beacon startup procedure, which will sync
-  // all slaves and setup the communication.
-  beacon_com_startup();
+    // Modules initializations
+    led_init();
+    led_thread(); //apply LED states
+    uart_debug_setup();
+    printf("startup\r\n");
+    err_code = 0;//beacon_com_init();
+#warning "communication deactivated"
+    drum_control_init();
+    
+    power_modulation_init();
 
-  scheduler_init();
+    // Initiate the beacon startup procedure, which will sync
+    // all slaves and setup the communication.
+    //beacon_com_startup();
 
-  // This calls the PPS_LOCK macro so it's better to be done at last!
-  beacon_can_init();
-  
-  // Initialize default CAN state
-  can_state = CAN_NODE_STATE_BEACON_BTX_IDLE ;
+    scheduler_init();
 
-  if(wdt_occured()) {
-    printf("Error: reset because of watch-dog!\n", err_code);
-    led_set_red(LED_BLINK_S2);
-    can_state = CAN_NODE_STATE_ERROR ;
-  }
+    // This calls the PPS_LOCK macro so it's better to be done at last!
+    beacon_can_init();
 
-  if(err_code) {
-    printf("Error with initialization: code %d\n", err_code);
-    led_set_red(LED_BLINK_S2);
-    can_state = CAN_NODE_STATE_ERROR ;
-  }
+    // Initialize default CAN state
+    can_state = CAN_NODE_STATE_BEACON_BTX_IDLE ;
 
-  //can_printf("Hello from BTX!\n");
+    if (wdt_occured()) {
+        printf("Error: reset because of watch-dog!\r\n"/*, err_code*/);
+        led_set_red(LED_BLINK_S2);
+        can_state = CAN_NODE_STATE_ERROR;
+    }
 
-  // Enable watchdog timer during main loop
-  wdt_clear();
-  wdt_run();  
+    if (err_code) {
+        printf("Error with initialization: code %d\r\n", err_code);
+        led_set_red(LED_BLINK_S2);
+        can_state = CAN_NODE_STATE_ERROR;
+    }
 
-  // Start the scheduler, ready to start
-  scheduler_start();
-  
-  printf("Ready to receive...\n");
-  led_set_green(LED_PULSE_S1);
+    //can_printf("Hello from BTX!\n");
 
-  // Main loop
-  while (1) {
+    
+    // Enable watchdog timer during main loop
+    wdt_clear();
+    wdt_run();
 
-    // Wait for a scheduler event
-    if (scheduler_ready()) {
+    // Start the scheduler, ready to start
+    scheduler_start();
+    printf("Ready to receive...\r\n");
+    led_set_green(LED_BLINK_S1); //LED_PULSE_S1
 
-      // Clear watchdog timer on every scheduler tick
-      wdt_clear();
+    //added JST for debug
+    can_match_state = CAN_SYSTEM_MATCH_STATE_SETUP;
 
-      // New commands
-      // ------------
+    // Main loop
+    while (1) {
+        uint8_t cnt;
+        // Wait for a scheduler event
+        if (scheduler_ready()) {
+            printf("schedule %i\r\n", cnt++);
+            // Clear watchdog timer on every scheduler tick
+            wdt_clear();
 
-      // New commands mostly depends on CAN commands inputs
-      switch(can_match_state) {
+            // New commands
+            // ------------
 
-        case CAN_SYSTEM_MATCH_STATE_SETUP:
-          
-          // Start the drum motor procedure during setup
-          // Only if not already running and only if allowed to
-          if(!drum_running && can_turret_cmd) {
-            drum_motor_start();
-            can_state = CAN_NODE_STATE_READY ;
-            
-          }
-          
-          break;
+            // New commands mostly depends on CAN commands inputs
+            switch (can_match_state) {
 
-        case CAN_SYSTEM_MATCH_STATE_READY:
-        case CAN_SYSTEM_MATCH_STATE_RUN:
+                case CAN_SYSTEM_MATCH_STATE_SETUP:
 
-          // Send CAN data only in ready and run at the specified rate
-          if(scheduler_task_ready(SCHEDULER_RATE_SEND_CAN_DATA)) {
-            beacon_can_send_opponent_1();
-            led_set_green(LED_BLINK_S2);
-            can_state = CAN_NODE_STATE_BEACON_BTX_RUN ;
+                    // Start the drum motor procedure during setup
+                    // Only if not already running and only if allowed to
+                    printf("CAN_SYSTEM_MATCH_STATE_SETUP\r\n");
+                    if (!drum_running && can_turret_cmd) {
+                        drum_motor_start();
+                        can_state = CAN_NODE_STATE_READY;
+                        printf("motor started \r\n");
+                    }
 
-  //        printf("[%d] Dist = %4u Angle = %4d Tim. = %4u Speed %2.2f Control = %2.2f\n",
-  //          beacon_infos[0].id ,
-  //          beacon_infos[0].distance,
-  //          beacon_infos[0].angle,
-  //          beacon_infos[0].timestamp,
-  //          current_speed_rps,
-  //          drum_control_rps);
-          }
+                    break;
 
-          break;
+                case CAN_SYSTEM_MATCH_STATE_READY:
+                case CAN_SYSTEM_MATCH_STATE_RUN:
+                    printf("CAN_SYSTEM_MATCH_STATE_RUN\r\n");
+                    // Send CAN data only in ready and run at the specified rate
+                    if (scheduler_task_ready(SCHEDULER_RATE_SEND_CAN_DATA)) {
+                        beacon_can_send_opponent_1();
+                        led_set_green(LED_BLINK_S2);
+                        can_state = CAN_NODE_STATE_BEACON_BTX_RUN;
 
-        // Other cases (IDLE, EMERGENCY, etc.)
-        default:
-          break;
+                        //        printf("[%d] Dist = %4u Angle = %4d Tim. = %4u Speed %2.2f Control = %2.2f\n",
+                        //          beacon_infos[0].id ,
+                        //          beacon_infos[0].distance,
+                        //          beacon_infos[0].angle,
+                        //          beacon_infos[0].timestamp,
+                        //          current_speed_rps,
+                        //          drum_control_rps);
+                    }
 
-      } // switch can_match_state
+                    break;
 
-      // Control the turret if running
-      if(drum_running) {
-        if(!can_turret_cmd) {
-          drum_motor_stop();
-          can_state = CAN_NODE_STATE_BEACON_BTX_IDLE ;
-        } else if(scheduler_task_ready(SCHEDULER_RATE_DRUM_CONTROL)) {
-          drum_control_thread();
-        }
-      }
+                    // Other cases (IDLE, EMERGENCY, etc.)
+                default:
+                    printf("CAN_DEFAULT\r\n");
+                    break;
 
-      // Always send the general status
-      if(scheduler_task_ready(SCHEDULER_RATE_SEND_CAN_STATUS)) {
-        beacon_can_send_status();
-        can_printf("Yo! Message from BTX!\nMatch State = %u\nThe local time is %u\n", can_match_state, tick_cnt);
-      }
+            } // switch can_match_state
 
-      // Call LED thread all the time
-      led_thread();
+            // Control the turret if running
+            if (drum_running) {
+                if (!can_turret_cmd) {
+                    drum_motor_stop();
+                    can_state = CAN_NODE_STATE_BEACON_BTX_IDLE;
+                    printf("motor stop\r\n");
+                } else if (scheduler_task_ready(SCHEDULER_RATE_DRUM_CONTROL)) {
+                    drum_control_thread();
+                    printf("drum ctrl\r\n");
+                }
+            }
 
-    } // scheduler
-  } // while(1)
+            // Always send the general status
+            if (scheduler_task_ready(SCHEDULER_RATE_SEND_CAN_STATUS)) {
+                //beacon_can_send_status();
+                //can_printf("Yo! Message from BTX!\r\nMatch State = %u\r\nThe local time is %u\r\n", can_match_state, tick_cnt);
+#warning "commented out for debug without CAN"
+            }
+
+            // Call LED thread all the time
+            led_thread();
+
+        } // scheduler
+    } // while(1)
 } // main
 
 

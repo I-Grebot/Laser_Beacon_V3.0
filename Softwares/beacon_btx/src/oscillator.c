@@ -57,5 +57,6 @@ void osc_init(void) {
 
     while (OSCCONbits.COSC != 3) ; // Wait until HSPLL mode is set
     while (OSCCONbits.LOCK != 1) ; // Wait until PLL is lock
+#warning "check clock config (HS for 8MHZ ?) + 1Mohm parallel ?"
 }
 

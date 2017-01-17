@@ -251,7 +251,7 @@ typedef signed   long sint32_t;
 // Define period for modulation output
 // and pulse length (duty-cycle value)
 #define MOD_OUT_PWM_PERIOD    512
-#define MOD_OUT_PWM_DUTY        8   // max 50% duty-cycle !
+#define MOD_OUT_PWM_DUTY      33    // max 50% duty-cycle !
 #define MOD_OUT_PWM_MARGIN     0
 
 // Modulation outputs use OC1/OC2
