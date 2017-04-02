@@ -235,7 +235,7 @@ typedef signed   long sint32_t;
 
 // DRUM TOP angle offset compensation, in 10th of degree unit
 // Includes [BRX] + processing + RF latency and physical TOP sensor offset
-#define DRUM_TOP_ANGLE_OFFSET 0
+#define DRUM_TOP_ANGLE_OFFSET 380
 
 // Select reference voltage = (3.3V/4) + (CVR/32)*3.3V
 // 1 CVR step = 103mV

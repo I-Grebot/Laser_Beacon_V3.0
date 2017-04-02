@@ -38,6 +38,7 @@
 
 // Speed target in Rotation per Second (RPS)
 #define DRUM_MOTOR_SPEED_TARGET_RPS 30
+#warning "33 measured ?"
 
 // -----------------------------------------------------------------------------
 // BEACON COMMUNICATION SYSTEM
@@ -79,7 +80,7 @@
 #define BEACON_COM_ADDR_MASTER 0b1111
 
 // Slave addresses, up to 15 with addresses ranging from 0b0000 to 0b1110
-#define BEACON_COM_NB_SLAVE 1
+#define BEACON_COM_NB_SLAVE 6
 
 // Macro to build a header if not broadcasting
 #define BEACON_COM_BUILD_HEADER(_addr) ((BEACON_COM_ADDR_HEADER << 4) | (_addr & 0xF))

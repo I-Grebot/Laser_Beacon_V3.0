@@ -221,6 +221,8 @@
 #define CC2500_MASK_SFD             0x08
 #define CC2500_SHIFT_SFD               3
 
+// RXFIFO_OVERFLOW is bit 7 in STATUS_RXBYTES register
+#define CC2500_MASK_RXFIFO_OVF      0x80
 // RXBYTES are 7 first bit in STATUS_RXBYTES register
 #define CC2500_MASK_RXBYTES         0x7F
 

@@ -30,6 +30,7 @@
 
 void photo_detect_init(void) {
 
+#warning "there is no software pull-up/down when PDD board is not soledered"
   // Initialize PDD feedback pins as inputs
   PDD_N_BA_TRIS = 1 ;
   PDD_N_AB_TRIS = 1 ;
@@ -144,7 +145,14 @@ inline void photo_detect_stop(void) {
 // -----------------------------------------------------------------------------
 // PROCESSING FUNCTIONS
 // -----------------------------------------------------------------------------
+#define D_LASER 38.5
+#define V_RPM   30
+#define CNT_FRQ 32000000
+#define ANGLE_ERROR 0.002687807
+#include "math.h"
+#include "dsp.h"
 
+#warning "TODO move define. V_RPM is 33 not 30 !"
 // Main processing function for Interrupt-Capture ISR
 // Declared as inline because we want to duplicate the code in the different ISR
 inline void photo_detect_process(uint16_t _ic_value) {
@@ -157,27 +165,38 @@ inline void photo_detect_process(uint16_t _ic_value) {
   // a time-delta between the 2 consecutive lasers but
   // a time-delta between 2 consecutive turret rotation.
   if(!TMR3) {
+    LED_2 = ~ LED_2;
+    dist_mm =  D_LASER/sin(V_RPM*2*PI*_ic_value/CNT_FRQ - ANGLE_ERROR);
+    
 
+    beacon_com_send_dist(dist_mm);
+#warning "TODO list"
+    //do not sent if too high delta with previous value (means wrong)
+    //permit a calibration with dip switchs ! (fixed distance 1m 3m to find D_LASER and ANGLE_ERROR)
+    
+    LED_2 = ~ LED_2;
+    printf("%i %i\n", _ic_value, dist_mm);
+    
     // Retrieve lut index
-    lut_idx = distance_lut_get_idx(_ic_value);
+    //lut_idx = distance_lut_get_idx(_ic_value);
 
     // Check for lower/higher bounds
-    if(lut_idx == 0) {
-      dist_mm = DISTANCE_LUT_MIN_MM ;
-    } else if(lut_idx == DISTANCE_LUT_DEPTH-1) {
-      dist_mm = DISTANCE_LUT_MAX_MM ;
+    //if(lut_idx == 0) {
+    //  dist_mm = DISTANCE_LUT_MIN_MM ;
+    //} else if(lut_idx == DISTANCE_LUT_DEPTH-1) {
+    //  dist_mm = DISTANCE_LUT_MAX_MM ;
 
     // Treat only correctly bounded values
-    } else {
+    //} else {
 
       // Get distance in mm after interpollation
-      dist_mm = distance_get_interp_mm(_ic_value, lut_idx);
+    //  dist_mm = distance_get_interp_mm(_ic_value, lut_idx);
       
       // Send it
-      beacon_com_send_dist(dist_mm);
+      //beacon_com_send_dist(dist_mm);
 
-      LED_2 = ~ LED_2;
-    }
+     // LED_2 = ~ LED_2;
+    //}
     
   } // !TMR3
 
@@ -190,13 +209,55 @@ inline void photo_detect_process(uint16_t _ic_value) {
 // -----------------------------------------------------------------------------
 // INTERRUPT SERVICE ROUTINES
 // -----------------------------------------------------------------------------
+volatile uint16_t first_IC1_cnt = 0xFFFF;
+volatile uint16_t first_IC2_cnt = 0xFFFF;
+volatile uint16_t first_IC7_cnt = 0xFFFF;
+volatile uint16_t first_IC8_cnt = 0xFFFF;
 
 // IC1 for PDD North
 void __attribute__((__interrupt__, no_auto_psv)) _IC1Interrupt(void) {
 
-  // Read IC buffer and call main process function
-  photo_detect_process(IC1BUF);
+    uint16_t dist_mm ;
+    uint16_t _IC1BUF = IC1BUF;
+  
+  // If MSW timer value is greater than 0 it means the
+  // LSW timer overflowed. Hence we are not measuring
+  // a time-delta between the 2 consecutive lasers but
+  // a time-delta between 2 consecutive turret rotation.
+  if(!TMR3 && first_IC1_cnt!= 0xFFFF) {
+      uint16_t _ic_value = _IC1BUF - first_IC1_cnt;
+    LED_2 = ~ LED_2;
+    dist_mm =  D_LASER/sin(V_RPM*2*PI*_ic_value/CNT_FRQ - ANGLE_ERROR);
+    
 
+    beacon_com_send_dist(dist_mm);
+#warning "TODO list"
+    //do not sent if too high delta with previous value (means wrong)
+    //permit a calibration with dip switchs ! (fixed distance 1m 3m to find D_LASER and ANGLE_ERROR)
+    
+    LED_2 = ~ LED_2;
+    printf("1 %i %i\n", _ic_value, dist_mm);
+    
+    
+  } 
+  else if (!TMR3) //first diode of a pair to be hit but not the very first
+  {
+      first_IC1_cnt = _IC1BUF;
+  }
+  else //first of all diode to be hit init the timer
+  {
+      // Clear timers
+  TMR3 = 0;
+  TMR2 = 0;
+
+    first_IC1_cnt = 0;
+    first_IC2_cnt = 0xFFFF;
+    first_IC7_cnt = 0xFFFF;
+    first_IC8_cnt = 0xFFFF;
+  }
+
+  
+  
   // Clear interrupt flag
   IFS0bits.IC1IF = 0;
 
@@ -204,6 +265,45 @@ void __attribute__((__interrupt__, no_auto_psv)) _IC1Interrupt(void) {
 
 // IC2 for PDD East
 void __attribute__((__interrupt__, no_auto_psv)) _IC2Interrupt(void) {
+
+uint16_t dist_mm ;
+    uint16_t _IC2BUF = IC2BUF;
+  
+  // If MSW timer value is greater than 0 it means the
+  // LSW timer overflowed. Hence we are not measuring
+  // a time-delta between the 2 consecutive lasers but
+  // a time-delta between 2 consecutive turret rotation.
+  if(!TMR3 && first_IC2_cnt!= 0xFFFF) {
+      uint16_t _ic_value = _IC2BUF - first_IC2_cnt;
+    LED_2 = ~ LED_2;
+    dist_mm =  D_LASER/sin(V_RPM*2*PI*_ic_value/CNT_FRQ - ANGLE_ERROR);
+    
+
+    beacon_com_send_dist(dist_mm);
+#warning "TODO list"
+    //do not sent if too high delta with previous value (means wrong)
+    //permit a calibration with dip switchs ! (fixed distance 1m 3m to find D_LASER and ANGLE_ERROR)
+    
+    LED_2 = ~ LED_2;
+    printf("2 %i %i\n", _ic_value, dist_mm);
+    
+    
+  } 
+  else if (!TMR3) //first diode of a pair to be hit but not the very first
+  {
+      first_IC2_cnt = _IC2BUF;
+  }
+  else //first of all diode to be hit init the timer
+  {
+      // Clear timers
+  TMR3 = 0;
+  TMR2 = 0;
+
+    first_IC1_cnt = 0xFFFF;
+    first_IC2_cnt = 0;
+    first_IC7_cnt = 0xFFFF;
+    first_IC8_cnt = 0xFFFF;
+  }
 
   // Clear interrupt flag
   IFS0bits.IC2IF = 0;
@@ -213,6 +313,45 @@ void __attribute__((__interrupt__, no_auto_psv)) _IC2Interrupt(void) {
 // IC7 for PDD South
 void __attribute__((__interrupt__, no_auto_psv)) _IC7Interrupt(void) {
 
+uint16_t dist_mm ;
+    uint16_t _IC7BUF = IC7BUF;
+  
+  // If MSW timer value is greater than 0 it means the
+  // LSW timer overflowed. Hence we are not measuring
+  // a time-delta between the 2 consecutive lasers but
+  // a time-delta between 2 consecutive turret rotation.
+  if(!TMR3 && first_IC7_cnt!= 0xFFFF) {
+      uint16_t _ic_value = _IC7BUF - first_IC7_cnt;
+    LED_2 = ~ LED_2;
+    dist_mm =  D_LASER/sin(V_RPM*2*PI*_ic_value/CNT_FRQ - ANGLE_ERROR);
+    
+
+    beacon_com_send_dist(dist_mm);
+#warning "TODO list"
+    //do not sent if too high delta with previous value (means wrong)
+    //permit a calibration with dip switchs ! (fixed distance 1m 3m to find D_LASER and ANGLE_ERROR)
+    
+    LED_2 = ~ LED_2;
+    printf("7 %i %i\n", _ic_value, dist_mm);
+    
+    
+  } 
+  else if (!TMR3) //first diode of a pair to be hit but not the very first
+  {
+      first_IC7_cnt = _IC7BUF;
+  }
+  else //first of all diode to be hit init the timer
+  {
+      // Clear timers
+  TMR3 = 0;
+  TMR2 = 0;
+
+    first_IC1_cnt = 0xFFFF;
+    first_IC2_cnt = 0xFFFF;
+    first_IC7_cnt = 0;
+    first_IC8_cnt = 0xFFFF;
+  }
+
   // Clear interrupt flag
   IFS1bits.IC7IF = 0;
 
@@ -221,6 +360,44 @@ void __attribute__((__interrupt__, no_auto_psv)) _IC7Interrupt(void) {
 // IC8 for PDD West
 void __attribute__((__interrupt__, no_auto_psv)) _IC8Interrupt(void) {
 
+  uint16_t dist_mm ;
+    uint16_t _IC8BUF = IC8BUF;
+  
+  // If MSW timer value is greater than 0 it means the
+  // LSW timer overflowed. Hence we are not measuring
+  // a time-delta between the 2 consecutive lasers but
+  // a time-delta between 2 consecutive turret rotation.
+  if(!TMR3 && first_IC8_cnt!= 0xFFFF) {
+      uint16_t _ic_value = _IC8BUF - first_IC8_cnt;
+    LED_2 = ~ LED_2;
+    dist_mm =  D_LASER/sin(V_RPM*2*PI*_ic_value/CNT_FRQ - ANGLE_ERROR);
+    
+
+    beacon_com_send_dist(dist_mm);
+#warning "TODO list"
+    //do not sent if too high delta with previous value (means wrong)
+    //permit a calibration with dip switchs ! (fixed distance 1m 3m to find D_LASER and ANGLE_ERROR)
+    
+    LED_2 = ~ LED_2;
+    printf("8 %i %i\n", _ic_value, dist_mm);
+    
+    
+  } 
+  else if (!TMR3) //first diode of a pair to be hit but not the very first
+  {
+      first_IC8_cnt = _IC8BUF;
+  }
+  else //first of all diode to be hit init the timer
+  {
+      // Clear timers
+  TMR3 = 0;
+  TMR2 = 0;
+
+    first_IC1_cnt = 0xFFFF;
+    first_IC2_cnt = 0xFFFF;
+    first_IC7_cnt = 0xFFFF;
+    first_IC8_cnt = 0;
+  }
   // Clear interrupt flag
   IFS1bits.IC8IF = 0;
 

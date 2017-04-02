@@ -23,14 +23,17 @@
  */
 
 #include "beacon_system.h"
+#include <stdio.h>
+#warning "remove stdio"
 
 // Constant IDs of beacons
 const uint8_t beacon_com_ids[BEACON_COM_NB_SLAVE] __attribute__((space(psv))) = {
-    0b0000 // Opponent main      robot
-//   ,0b0001 // Opponent secondary robot
-//   ,0b0100 // Static TOP    beacon
-//   ,0b0101 // Static MIDDLE beacon (other side than Top)
-//   ,0b0110 // Static BOTTOM beacon (same side than Top)
+    0b0001, // Static TOP    beacon
+    0b0010, // Static BOTTOM beacon (same side than Top)
+    0b0011, // Static MIDDLE beacon (other side than Top)
+    0b0100, // friend secondary
+    0b0101, // Opponent main      robot
+    0b0110, // Opponent secondary robot
 };
 
 // -----------------------------------------------------------------------------
@@ -130,8 +133,7 @@ void beacon_com_send_packet(uint8_t _dest_addr, uint8_t _command, uint16_t _data
 
   // Fill the TX FIFO with data and send them
   cc2500_send_rf_data(rf_datas, BEACON_COM_PACKET_LENGTH);
-  cc2500_send_strobe(CC2500_ADDR_STROBE_STX);
-  
+  cc2500_send_strobe(CC2500_ADDR_STROBE_STX);  
 }
 
 // Handle a packet RX (called back after RX isr)
@@ -139,28 +141,39 @@ void beacon_com_send_packet(uint8_t _dest_addr, uint8_t _command, uint16_t _data
 void beacon_com_receive_packet(sint16_t _angle, uint16_t _timestamp) {
 
   uint8_t rx_nb_bytes ;
-  uint8_t rf_datas[BEACON_COM_PACKET_LENGTH] ;
+  uint8_t rf_datas[BEACON_COM_PACKET_LENGTH + 2]; //+2  for RSSI and LQI
   uint8_t dest_addr ;
   uint8_t emt_addr ;
   uint8_t command ;
   uint16_t data ;
-
+  uint8_t rx_status;
+  uint8_t rssi;
+  uint8_t lqi;
+  
   do {
-
-    rx_nb_bytes = cc2500_read_status(CC2500_ADDR_STATUS_RXBYTES) & CC2500_MASK_RXBYTES;
-
+    rx_status  = cc2500_read_status(CC2500_ADDR_STATUS_RXBYTES);
+    rx_nb_bytes = rx_status & CC2500_MASK_RXBYTES;
+    
+    if(rx_status & CC2500_MASK_RXFIFO_OVF)
+    {
+        printf("TODO RX_OVF\n");
+#warning "TODO"
+    }
     // Handles the data only if enough ware received
-    if(rx_nb_bytes >= BEACON_COM_PACKET_LENGTH) {
-
+    else if(rx_nb_bytes >= BEACON_COM_PACKET_LENGTH+2) {
+        
+            
       // Read data from chip
-      cc2500_receive_rf_data(rf_datas, BEACON_COM_PACKET_LENGTH);
+      cc2500_receive_rf_data(rf_datas, BEACON_COM_PACKET_LENGTH+2);
 
       // Decode it and update the associated beacon_info
       dest_addr = rf_datas[0];
       emt_addr = rf_datas[1] ;
       command = rf_datas[2] ;
       data = rf_datas[3] << 8 | rf_datas[4];
-
+      rssi = rf_datas[5];
+      lqi = rf_datas[6];
+      
       // Broadcast
       //if(dest_addr == BEACON_COM_ADDR_BROADCAST) {
 
@@ -175,22 +188,32 @@ void beacon_com_receive_packet(sint16_t _angle, uint16_t _timestamp) {
           case BEACON_COM_CMD_READY: break;
 
           case BEACON_COM_CMD_DIST:
-            beacon_infos[0].id        = BEACON_COM_DECODE_HEADER(emt_addr) ;
-            beacon_infos[0].state     = BEACON_READY ;
-            beacon_infos[0].distance  = data ;
-            beacon_infos[0].angle     = _angle ;
-            beacon_infos[0].timestamp = _timestamp ;
-            break;
+          {
+              uint8_t emt = BEACON_COM_DECODE_HEADER(emt_addr);
+              if(emt>0 && emt <= BEACON_COM_NB_SLAVE)
+              {
+                beacon_infos[emt-1].id        = emt ;
+                beacon_infos[emt-1].state     = BEACON_READY ;
+                beacon_infos[emt-1].distance  = data ;
+                beacon_infos[emt-1].angle     = _angle ;
+                beacon_infos[emt-1].timestamp = _timestamp ;
+                break;
+              }
+          }
         }
 
      // }
 
-        rx_nb_bytes -= BEACON_COM_PACKET_LENGTH;
+        rx_nb_bytes -= BEACON_COM_PACKET_LENGTH+2;
         
     } // if rx_bytes
-
+    else
+    {
+#warning "TODO"
+        printf("TODO strange\n");
+    }
     // Continue to read if there is still something!
-  } while(rx_nb_bytes >= BEACON_COM_PACKET_LENGTH);
+  } while(rx_nb_bytes >= BEACON_COM_PACKET_LENGTH+2);
 
 }
 
@@ -231,7 +254,6 @@ void beacon_com_startup(void) {
   cc2500_write_reg(CC2500_ADDR_REG_CHANNR, selected_channel);
   
 #ifdef BEACON_COM_IS_MASTER
-
   // Initialize the beacon infos
   for(idx=0; idx<BEACON_COM_NB_SLAVE; idx++) {
     beacon_infos[idx].state = BEACON_OFF ;
@@ -246,13 +268,15 @@ void beacon_com_startup(void) {
 
   //cc2500_find_best_channel();
 
-  // CAL and listen from now
+  // Calibrate Freq. synth. and turn it OFF
   cc2500_send_strobe(CC2500_ADDR_STROBE_SCAL);
   while(cc2500_get_chip_marcstate() != CC2500_MARCSTATE_IDLE);
 
+  // flush Rx FIFO
   cc2500_send_strobe(CC2500_ADDR_STROBE_SFRX);
   while(cc2500_get_chip_marcstate() != CC2500_MARCSTATE_IDLE);
 
+  // Enable RX. Perform cal. if coming from IDLE
   cc2500_send_strobe(CC2500_ADDR_STROBE_SRX);
   while(cc2500_get_chip_marcstate() != CC2500_MARCSTATE_RX);
 

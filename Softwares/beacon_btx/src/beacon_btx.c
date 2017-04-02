@@ -188,18 +188,18 @@ int main(void) {
 
     // Modules initializations
     led_init();
-    led_thread(); //apply LED states
     uart_debug_setup();
-    printf("startup\r\n");
-    err_code = 0;//beacon_com_init();
-#warning "communication deactivated"
+
+    err_code = beacon_com_init();
+    #warning "there is infinithe while inside (not covered by WDT)"
+
     drum_control_init();
     
     power_modulation_init();
 
     // Initiate the beacon startup procedure, which will sync
     // all slaves and setup the communication.
-    //beacon_com_startup();
+    beacon_com_startup();
 
     scheduler_init();
 
@@ -241,7 +241,7 @@ int main(void) {
         uint8_t cnt;
         // Wait for a scheduler event
         if (scheduler_ready()) {
-            printf("schedule %i\r\n", cnt++);
+            //printf("schedule %i\r\n", cnt++);
             // Clear watchdog timer on every scheduler tick
             wdt_clear();
 
@@ -255,31 +255,38 @@ int main(void) {
 
                     // Start the drum motor procedure during setup
                     // Only if not already running and only if allowed to
-                    printf("CAN_SYSTEM_MATCH_STATE_SETUP\r\n");
+                    //printf("CAN_SYSTEM_MATCH_STATE_SETUP\r\n");
                     if (!drum_running && can_turret_cmd) {
                         drum_motor_start();
                         can_state = CAN_NODE_STATE_READY;
                         printf("motor started \r\n");
+                        can_match_state = CAN_SYSTEM_MATCH_STATE_READY; //add JST
                     }
 
                     break;
 
                 case CAN_SYSTEM_MATCH_STATE_READY:
                 case CAN_SYSTEM_MATCH_STATE_RUN:
-                    printf("CAN_SYSTEM_MATCH_STATE_RUN\r\n");
+                    //printf("CAN_SYSTEM_MATCH_STATE_RUN\r\n");
                     // Send CAN data only in ready and run at the specified rate
                     if (scheduler_task_ready(SCHEDULER_RATE_SEND_CAN_DATA)) {
-                        beacon_can_send_opponent_1();
+                        //beacon_can_send_opponent_1();
+#warning "commented for debug no can"
                         led_set_green(LED_BLINK_S2);
                         can_state = CAN_NODE_STATE_BEACON_BTX_RUN;
 
-                        //        printf("[%d] Dist = %4u Angle = %4d Tim. = %4u Speed %2.2f Control = %2.2f\n",
-                        //          beacon_infos[0].id ,
-                        //          beacon_infos[0].distance,
-                        //          beacon_infos[0].angle,
-                        //          beacon_infos[0].timestamp,
-                        //          current_speed_rps,
-                        //          drum_control_rps);
+                        uint8_t cnt;
+                        for(cnt=0; cnt<BEACON_COM_NB_SLAVE; cnt++)
+                        {
+                                printf("[%d] Dist = %4u Angle = %4d Tim. = %4u\n",
+                                    beacon_infos[cnt].id ,
+                                    beacon_infos[cnt].distance,
+                                    beacon_infos[cnt].angle,
+                                    beacon_infos[cnt].timestamp);
+                        }       
+                                printf("Speed %2.2f Control = %2.2f\n",
+                                    current_speed_rps,
+                                    drum_control_rps);
                     }
 
                     break;
@@ -299,7 +306,7 @@ int main(void) {
                     printf("motor stop\r\n");
                 } else if (scheduler_task_ready(SCHEDULER_RATE_DRUM_CONTROL)) {
                     drum_control_thread();
-                    printf("drum ctrl\r\n");
+                    //printf("drum ctrl\r\n");
                 }
             }
 

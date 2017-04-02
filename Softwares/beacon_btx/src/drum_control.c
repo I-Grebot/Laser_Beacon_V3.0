@@ -181,6 +181,11 @@ inline uint16_t drum_motor_get_angle(void) {
   // [BTX] timer sampling
   angle_deg -= DRUM_TOP_ANGLE_OFFSET;
 
+  if(angle_deg < 0) //ensure returned value is positive
+  {
+      angle_deg += 3600; 
+  }
+  
   // Can be cast back in 16bit value
   return (sint16_t) angle_deg;
 }

@@ -139,7 +139,8 @@ void cc2500_init_sdi_isr(void) {
   RPINR0bits.INT1R = CC2500_SDI_PIN ;
 
   // Interrupt on positive edge
-  INTCON2bits.INT1EP = 0 ;
+  INTCON2bits.INT1EP = 1 ;
+#warning "JST put at falling edge to trigger at end of packet reception instead start"
 
   // Define INT1 priority to middle
   //IPC5bits.INT1IP = 0b100 ;
@@ -366,7 +367,7 @@ void cc2500_write_cfg(void) {
     
   // Wait for chip to be in IDLE
   while(cc2500_get_chip_state() != CC2500_STATE_IDLE);
-
+  
   // Build HEADER_regburst, start from 1st address
   wr_datas[0] = CC2500_BUILD_HEADER(0, 1, 0) ;
   for(idx = 1; idx <= CC2500_NB_REG ; idx++)

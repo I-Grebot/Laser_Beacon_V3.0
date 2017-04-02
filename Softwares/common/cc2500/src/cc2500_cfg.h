@@ -33,7 +33,7 @@
 // Registers linked to functionality, defaulted to a
 // given value but which can be overwritten.
 #define CC2500_CFG_IOCFG2       0x29 // CHIP_RDYn
-#define CC2500_CFG_IOCFG1       0x06 // 
+#define CC2500_CFG_IOCFG1       0x06 // SHR reception (low at end of Rx)
 #define CC2500_CFG_IOCFG0       0x3F // CLK_XOSC/192
 #define CC2500_CFG_FIFOTHR      0x00 // 4 RX Bytes, 61 TX Bytes
 #define CC2500_CFG_PKTLEN       0x05 // Default packet length when fixed size is used
