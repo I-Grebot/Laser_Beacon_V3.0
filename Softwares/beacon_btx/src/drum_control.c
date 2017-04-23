@@ -173,17 +173,21 @@ inline uint16_t drum_motor_get_angle(void) {
   // -1800 <= angle_deg      < +1800
   // (This is quite overkill to use 32bit here but we want to make sure
   //  that we dont loose precision from processing)
-  angle_deg *= 3600 ;
-  angle_deg /= drum_speed ;
+  angle_deg *= 3600;
+  angle_deg /= drum_speed;
 
   // Remove offset to adjuste robot's 0° with turret 0°
   // Also compensate fixed latency delay between [BRX] detection and
   // [BTX] timer sampling
   angle_deg -= DRUM_TOP_ANGLE_OFFSET;
 
-  if(angle_deg < 0) //ensure returned value is positive
+  while(angle_deg < 0) //ensure returned value is ranged
   {
       angle_deg += 3600; 
+  }
+  while(angle_deg >= 3600)
+  {
+      angle_deg -= 3600; 
   }
   
   // Can be cast back in 16bit value

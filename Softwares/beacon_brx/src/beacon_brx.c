@@ -178,7 +178,7 @@ int main(void) {
   fake_dist_mm = 0;
   while(1) {
     for(cnt=1000000;cnt;cnt--);
-    if(DIL_1) {
+    if(DIL_1 == 0 && DIL_2 == 0 && DIL_3 == 0) {
       LED_2 = ~LED_2;
 
       beacon_com_send_dist(fake_dist_mm++);

@@ -5,6 +5,9 @@ import serial.tools.list_ports
 from math import sqrt
 from math import acos
 from math import asin
+from math import cos
+from math import sin
+from math import atan2
 import math
 
 
@@ -36,7 +39,14 @@ diag12=sqrt((DX2-DX1)**2+(DY2-DY1)**2)
 diag23=sqrt((DX3-DX2)**2+(DY3-DY2)**2)
 diag31=sqrt((DX1-DX3)**2+(DY1-DY3)**2)
 
-
+#input/output in 1/10th degrees
+def rangeAngle(A):
+    while A<0:
+        A += 3600
+    while A >= 3600:
+        A -= 3600
+    
+    return A
 
 
 
@@ -181,9 +191,17 @@ if __name__ == '__main__':
     L31 = Line(Point(0,0), Point(1,1))
     
     pos=Circle(Point(0,0),1)
+    dir0line = Line(Point(0,0), Point(1,1))
+    pos4=Circle(Point(0,0),1)
+    pos5=Circle(Point(0,0),1)
+    pos6=Circle(Point(0,0),1)
     
     serList = serial.tools.list_ports.comports()
-    serList = [s for s in serList if s.description=="TTL232R-3V3"]	
+    
+    #for s in serList:
+    #    print("-",s.description,"-",s.vid, s.pid)
+    
+    serList = [s for s in serList if (s.vid==1027 and s.pid==24577)]	
     if len(serList) != 1:
         print("Error did not found serial interface to use")
     else :
@@ -191,10 +209,13 @@ if __name__ == '__main__':
         ser.reset_input_buffer()
         
         S = b""
-        turretInfos=[[0,0,0],[0,0,0],[0,0,0]]    
+        turretInfos=[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]    
             
+        loopTime =0
         #for i in range(1000):
         while True:    
+            print("loop", time.time()-loopTime)
+            loopTime=time.time()
             
             Sp_bloc = []
             while len(Sp_bloc)<2:
@@ -207,14 +228,21 @@ if __name__ == '__main__':
                 if len(Sp_bloc) >= 2:
                     S = Sp_bloc[1]
                     Sp = Sp_bloc[0].split()
-                    if len(Sp) == 34:
+                    if len(Sp) == 64:
                         try:
-                            turretInfos = [[int(Sp[7]), int(Sp[10]), int(Sp[13])], [int(Sp[17]), int(Sp[20]), int(Sp[23])], [int(Sp[27]), int(Sp[30]), int(Sp[33])]]
-                            #print(turretInfos[0][0])
-                            #print(turretInfos[1][0])
-                            #print(turretInfos[2][0])
+                            turretInfos = [ [int(Sp[7]),  int(Sp[10]), int(Sp[13])], 
+                                            [int(Sp[17]), int(Sp[20]), int(Sp[23])], 
+                                            [int(Sp[27]), int(Sp[30]), int(Sp[33])], 
+                                            [int(Sp[37]), int(Sp[40]), int(Sp[43])], 
+                                            [int(Sp[47]), int(Sp[50]), int(Sp[53])], 
+                                            [int(Sp[57]), int(Sp[60]), int(Sp[63])]]
+                            for i in range(6):
+                                print(turretInfos[i][0], turretInfos[i][1], turretInfos[i][2])
                         except:
                             print("unexpected exception")
+                    else:
+                        print("bad split ", len(Sp))
+                       
         
             c1,c2,c3 = cList.pop(0)
             c1.undraw()
@@ -240,7 +268,7 @@ if __name__ == '__main__':
             c3.draw(win)
             cList.append([c1,c2,c3])
            
-            pos.undraw() 
+            
             L12.undraw()
             L23.undraw()
             L31.undraw()
@@ -337,11 +365,12 @@ if __name__ == '__main__':
             L31.draw(win)
             
             # position of BTX
-            X = ((b12-b31)/a31 + (b12-b23)/a23 - (b31-b23)/(a31-a23))/3
-            Y = (2*b12+(b31-a31*(b31-b23)/(a31-a23)))/3
+            X = int(((b12-b31)/a31 + (b12-b23)/a23 - (b31-b23)/(a31-a23))/3)
+            Y = int((2*b12+(b31-a31*(b31-b23)/(a31-a23)))/3)
             
             
             # drawing
+            pos.undraw() 
             pos = Circle(Point(X,Y),40)
             pos.setOutline("yellow")
             pos.setFill("red")
@@ -350,41 +379,106 @@ if __name__ == '__main__':
             
             
             #calculate BTX angle with mean of 3 BRX viewing angles
-            A1 = turretInfos[0][1]
-            A2 = turretInfos[1][1]
-            A3 = turretInfos[2][1]
+            A1_rel = turretInfos[0][1]
+            A2_rel = turretInfos[1][1]
+            A3_rel = turretInfos[2][1]
+            A1_abs = 0 #declare the vars
+            A2_abs = 0
+            A3_abs = 0
             
             if R1 !=0 :
-                A1_ = acos((X - DX1)/R1)*360/2/PI
+                A1_ = acos((X - DX1)/R1)*360/(2*PI)
                 A1_ = int(A1_*10) #10th Degrees
-                A1 = A1 + A1_ + 1800
+                A1_abs = A1_rel + A1_ + 1800            # TODO all 3 Ax_ signs to verify
+                #print("Alpha",A1_)
+                # TODO fail safe
             
             if R2 != 0:
-                A2_ = acos((X - DX2)/R2)*360/2/PI
+                A2_ = acos((X - DX2)/R2)*360/(2*PI)
                 A2_ = int(A2_*10) #10th Degrees
-                A2 = A2 - A2_ + 1800
+                A2_abs = A2_rel - A2_ + 1800
+                #print("Beta",A2_)
  
             if R3 != 0:
-                A3_ = asin((Y - DY3)/R3)*360/2/PI
+                A3_ = asin((Y - DY3)/R3)*360/(2*PI)
                 A3_ = int(A3_*10) #10th Degrees
-                A3 = A3 - A3_
+                A3_abs = A3_rel + A3_
+                #print("Gama",A3_)
+                print("This is the wrong one !")
                 
             
-            #TODO all angles must be positive    
-            A = (A1 + A2 + A3) /3    
+            A1_abs = rangeAngle(A1_abs)
+            A2_abs = rangeAngle(A2_abs)
+            A3_abs = rangeAngle(A3_abs)
+            
+            
+            A_abs_bad = (A1_abs + A2_abs + A3_abs) /3
+            xa = (cos(A1_abs*2*PI/3600) + cos(A3_abs*2*PI/3600) + cos(A3_abs*2*PI/3600) )/3
+            ya = (sin(A1_abs*2*PI/3600) + sin(A3_abs*2*PI/3600) + sin(A3_abs*2*PI/3600) )/3
+            A_abs = int(10* atan2(ya, xa)*360/2/PI)
+            
             # drawing
-            print("Angles ", A1, A2, A3, A)
+            print("Angles 1 2 3 mean badMean ", A1_abs, A2_abs, A3_abs, A_abs, A_abs_bad)
             #TODO to be confirmed for all
+            dir0line.undraw()
+            dir0line = Line(Point(X,Y),Point(X+50*cos(A_abs*2*PI/3600),Y+50*sin(A_abs*2*PI/3600)))
+            dir0line.setWidth(5)
+            dir0line.setFill("yellow") #TODO check if this could be done only at init (not erased by undraw)
+            dir0line.draw(win)
+            
+            
+            A4_rel = turretInfos[3][1]
+            A5_rel = turretInfos[4][1]
+            A6_rel = turretInfos[5][1]
             
             #calculate distance/angle to opponent, position of opponent
+            A4_abs = A4_rel + A_abs #-3600 not needed
+            R4_dx = int(turretInfos[3][0] * cos(A4_abs/10*2*PI/360))
+            R4_dy = int(turretInfos[3][0] * sin(A4_abs/10*2*PI/360))
             
+            X4 = X + R4_dx
+            Y4 = Y + R4_dy
+            print("R4", R4_dx, R4_dy, X4, Y4)
             
+            pos4.undraw() 
+            pos4 = Circle(Point(X4,Y4),40)
+            pos4.setOutline("yellow")
+            pos4.setFill("blue")
+            pos4.draw(win)
             
+            #calculate distance/angle to opponent, position of opponent
+            A5_abs = A5_rel + A_abs #-3600 not needed
+            R5_dx = int(turretInfos[4][0] * cos(A5_abs/10*2*PI/360))
+            R5_dy = int(turretInfos[4][0] * sin(A5_abs/10*2*PI/360))
             
+            X5 = X + R5_dx
+            Y5 = Y + R5_dy
+            
+            pos5.undraw() 
+            pos5 = Circle(Point(X5,Y5),40)
+            pos5.setOutline("yellow")
+            pos5.setFill("dodger blue")
+            pos5.draw(win)
+            
+            #calculate distance/angle to opponent, position of opponent
+            A6_abs = A6_rel + A_abs #-3600 not needed
+            R6_dx = int(turretInfos[5][0] * cos(A6_abs/10*2*PI/360))
+            R6_dy = int(turretInfos[5][0] * sin(A6_abs/10*2*PI/360))
+            
+            X6 = X + R6_dx
+            Y6 = Y + R6_dy
+            
+            pos6.undraw() 
+            pos6 = Circle(Point(X6,Y6),40)
+            pos6.setOutline("yellow")
+            pos6.setFill("deep sky blue")
+            pos6.draw(win)
             
             
             #time.sleep(0.1) #100ms sleep between updates
-            win.flush()
+            #win.flush()
+            update()  # update the window as win.autoflush = False
+            time.sleep(0.01)
         ser.close()
         print("Program ended, click into the window to close !!!")
         win.getMouse()
