@@ -39,7 +39,7 @@
  * -----------------------------------------------------------------------------
  */
 
-#include "beacon_btx.h"
+
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION
@@ -105,8 +105,13 @@ _FWDT(FWDTEN_OFF & WDTPOST_PS8192);
 // #pragma config statements should precede project file includes.
 // Use project enums instead of #define for ON and OFF.
 
+
 #include <xc.h>
 #include <stdio.h>
+#include "beacon_btx.h"
+#include "beacon_regs.h"
+#include "beacon_SPI.h"
+
 
 
 // -----------------------------------------------------------------------------
@@ -205,6 +210,9 @@ int main(void) {
 
     // This calls the PPS_LOCK macro so it's better to be done at last!
     beacon_can_init();
+    
+    // init SPI slave
+    beacon_SPI_init();
 
     // Initialize default CAN state
     can_state = CAN_NODE_STATE_BEACON_BTX_IDLE ;
@@ -284,9 +292,16 @@ int main(void) {
                                     beacon_infos[cnt].angle,
                                     beacon_infos[cnt].timestamp);
                         }       
-                                printf("Speed %2.2f Control = %2.2f\n",
+                                printf("Speed %2.2f Control = %2.2fCnt%i\n",
                                     current_speed_rps,
-                                    drum_control_rps);
+                                    drum_control_rps,isrCnt);
+                                if(SPI2STATbits.SPIRBF)
+                                {
+                                    while(1)
+                                    {
+                                        printf("hell\r\n");
+                                    }
+                                }
                     }
 
                     break;

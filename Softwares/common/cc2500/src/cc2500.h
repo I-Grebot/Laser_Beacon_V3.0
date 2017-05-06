@@ -80,7 +80,7 @@
 #ifndef CC2500_USE_SPI2
 
 // PPS I/Os
-#define CC2500_SCK_PIN 0b01000
+#define CC2500_SCK_PIN 0b01000 //TODO there are defines for that (_RPOUT_SCK1OUT)
 #define CC2500_SDO_PIN 0b00111
 #define CC2500_SDI_RPN (RPINR20bits.SDI1R)
 

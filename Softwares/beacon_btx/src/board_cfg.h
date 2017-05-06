@@ -112,6 +112,31 @@ typedef signed   long sint32_t;
 #define RF_MISO_TRIS  (TRISBbits.TRISB12)
 #define RF_MISO_PIN   12
 
+
+// SPI beacon slave Interfaces
+// --------------
+
+//TODO remove this (just for info)
+//SPI2 Data Input SDI2 RPINR22/ SDI2R<4:0>
+//SPI2 Clock Input SCK2 RPINR22 SCK2R<4:0>
+//SPI2 Slave Select Input SS2 RPINR23 SS2R<4:0>
+//SDO2 01010 RPn tied to SPI2 Data Output
+
+//inputs
+#define SPI_SLAVE_CSN_TRIS          (TRISBbits.TRISB8)
+#define SPI_SLAVE_CSN_RP_NUMBER     8
+
+#define SPI_SLAVE_CLK_TRIS          (TRISBbits.TRISB9)
+#define SPI_SLAVE_CLK_RP_NUMBER     9
+
+#define SPI_SLAVE_MOSI_TRIS         (TRISCbits.TRISC6)
+#define SPI_SLAVE_MOSI_RP_NUMBER    22
+
+//output
+#define SPI_SLAVE_MISO_TRIS         (TRISCbits.TRISC7)
+#define SPI_SLAVE_MISO_RPN          (RPOR11bits.RP23R)
+
+
 // CAN Interface
 // -------------
 

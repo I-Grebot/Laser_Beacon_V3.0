@@ -73,7 +73,7 @@ typedef signed   long sint32_t;
  * RC0 to RC9  => RP16 to RP25
  */
 
-// SPI Interfaces
+// SPI RF Interfaces //TODO rename because we use multiple SPI
 // --------------
 
 // CSN_A output mapped on RB2/RP2

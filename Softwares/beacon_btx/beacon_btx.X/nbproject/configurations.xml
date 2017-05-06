@@ -13,6 +13,9 @@
       <itemPath>../../common/beacon_system/src/beacon_system.h</itemPath>
       <itemPath>../../common/scheduler/src/scheduler.h</itemPath>
       <itemPath>../../common/robot_system/src/robot_system.h</itemPath>
+      <itemPath>../../common/beacon_regs.h</itemPath>
+      <itemPath>../src/beacon_SPI.h</itemPath>
+      <itemPath>../src/trilateration.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -34,6 +37,8 @@
       <itemPath>../src/led.c</itemPath>
       <itemPath>../../common/scheduler/src/scheduler.c</itemPath>
       <itemPath>../../common/watchdog/src/watchdog.c</itemPath>
+      <itemPath>../src/beacon_SPI.c</itemPath>
+      <itemPath>../src/trilateration.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -41,6 +46,11 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>.</Elem>
+    <Elem>../../common</Elem>
+    <Elem>../src</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">
@@ -94,7 +104,7 @@
         <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../../common/can/src;../../common/cc2500/src;../../common/beacon_system/src;../../common/scheduler/src;../../common/robot_system/src"/>
+                  value="../src;../../common/can/src;../../common/cc2500/src;../../common/beacon_system/src;../../common/scheduler/src;../../common/robot_system/src;../../common"/>
         <property key="isolate-each-function" value="false"/>
         <property key="keep-inline" value="false"/>
         <property key="oXC16gcc-align-arr" value="false"/>
@@ -134,6 +144,7 @@
         <property key="list-section-info" value="false"/>
         <property key="list-source" value="false"/>
         <property key="list-symbols" value="false"/>
+        <property key="oXC16asm-extra-opts" value=""/>
         <property key="oXC16asm-list-to-file" value="false"/>
         <property key="omit-debug-dirs" value="false"/>
         <property key="omit-forms" value="false"/>
@@ -168,6 +179,7 @@
         <property key="linker-stack" value="true"/>
         <property key="linker-symbols" value=""/>
         <property key="map-file" value=""/>
+        <property key="no-ivt" value="false"/>
         <property key="oXC16ld-extra-opts" value=""/>
         <property key="oXC16ld-fill-upper" value="0"/>
         <property key="oXC16ld-force-link" value="false"/>
@@ -192,8 +204,11 @@
         <property key="fast-math" value="false"/>
         <property key="generic-16-bit" value="false"/>
         <property key="legacy-libc" value="false"/>
+        <property key="mpreserve-all" value="false"/>
         <property key="oXC16glb-macros" value=""/>
         <property key="output-file-format" value="elf"/>
+        <property key="preserve-all" value="false"/>
+        <property key="preserve-file" value=""/>
         <property key="relaxed-math" value="false"/>
         <property key="save-temps" value="false"/>
       </C30Global>
