@@ -260,7 +260,15 @@ void beacon_com_startup(void) {
     beacon_infos[idx].id    = beacon_com_ids[idx];
     // others set to 0 already
   }
-
+  //TODO remove, was for debug
+  beacon_infos[0].distance = 2976;
+  beacon_infos[0].angle = 2422;
+  beacon_infos[1].distance = 2752;
+  beacon_infos[1].angle = 2857;
+  beacon_infos[2].distance = 448;
+  beacon_infos[2].angle = 1114;
+  beacon_infos[3].distance = 598;
+  beacon_infos[3].angle = 2795;
   // Start to scan channels
   //cc2500_scan_channels();
 

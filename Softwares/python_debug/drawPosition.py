@@ -15,19 +15,19 @@ PI = math.pi
 NB_HISTORY = 2
 SCALE = 3
 T_COLOR = "yellow"
-T_LEN = 3000
-T_HIGH = 2000
+TABLE_LEN = 3000
+TABLE_HIGH = 2000
 TABLE_COLOR = "green"
 D_RADIUS = 2
 D_COLOR = "red"
 #grey from 0 (black) to 100 (white)
 
 DX1=-22-17
-DY1=T_HIGH+22+35
+DY1=TABLE_HIGH+22+35
 DX2=-22-17
 DY2=-22-80+35
-DX3=T_LEN+22+17
-DY3=T_HIGH/2+80/2-35
+DX3=TABLE_LEN+22+17
+DY3=TABLE_HIGH/2+80/2-35
 
 D1_POINT = Point(DX1, DY1)
 D2_POINT = Point(DX2, DY2)
@@ -39,13 +39,16 @@ diag12=sqrt((DX2-DX1)**2+(DY2-DY1)**2)
 diag23=sqrt((DX3-DX2)**2+(DY3-DY2)**2)
 diag31=sqrt((DX1-DX3)**2+(DY1-DY3)**2)
 
-#input/output in 1/10th degrees
+#input/output in rads 
 def rangeAngle(A):
     while A<0:
-        A += 3600
-    while A >= 3600:
-        A -= 3600
+        A += 2*PI
+    while A >= 2*PI:
+        A -= 2*PI
     
+    if A < 0: #just to be sure beacause we work with floats ...
+        A=0
+        
     return A
 
 
@@ -104,6 +107,7 @@ def SCI(Ta, Ra, Tb, Rb):
     x=cxc+h*(cyb-cya)/dist
     y=cyc-h*(cxb-cxa)/dist
     res.append([x,y])
+    print("SCI X Y ", x, y)
     
     #there is a 2nd solution
     if dist!=Ra+Rb:
@@ -117,14 +121,14 @@ def SCI(Ta, Ra, Tb, Rb):
 if __name__ == '__main__':
     print(HIST_COLORS)
     print("Starting program")
-    win = GraphWin("drawPosition",(T_LEN+2*(22+80))/SCALE,(T_HIGH+2*(22+80))/SCALE)
+    win = GraphWin("drawPosition",(TABLE_LEN+2*(22+80))/SCALE,(TABLE_HIGH+2*(22+80))/SCALE)
     win.autoflush = False
-    win.setCoords(-80-22,-80-22,T_LEN+80+22,T_HIGH+80+22)
-    table = Rectangle(Point(0,0), Point(T_LEN,T_HIGH))
+    win.setCoords(-80-22,-80-22,TABLE_LEN+80+22,TABLE_HIGH+80+22)
+    table = Rectangle(Point(0,0), Point(TABLE_LEN,TABLE_HIGH))
     table.setFill(TABLE_COLOR)
     table.draw(win)
     #haut gauche
-    t1 = Rectangle(Point(-80-22,T_HIGH+22), Point(-22,T_HIGH+22+80))
+    t1 = Rectangle(Point(-80-22,TABLE_HIGH+22), Point(-22,TABLE_HIGH+22+80))
     t1.setFill(T_COLOR)
     t1.draw(win)
     d1 = Circle(D1_POINT, D_RADIUS)
@@ -140,7 +144,7 @@ if __name__ == '__main__':
     d2.setOutline(D_COLOR)
     d2.draw(win)
     #droite milieu
-    t3 = Rectangle(Point(T_LEN+22,T_HIGH/2-80/2), Point(T_LEN+22+80,T_HIGH/2+80/2))
+    t3 = Rectangle(Point(TABLE_LEN+22,TABLE_HIGH/2-80/2), Point(TABLE_LEN+22+80,TABLE_HIGH/2+80/2))
     t3.setFill(T_COLOR)
     t3.draw(win)
     d3 = Circle(D3_POINT, D_RADIUS)
@@ -150,13 +154,13 @@ if __name__ == '__main__':
     
     # dessiner les carreaux du sol
     for i in range(10):
-        jv=Line(Point(300*i+190,0), Point(300*i+190,T_HIGH))
+        jv=Line(Point(300*i+190,0), Point(300*i+190,TABLE_HIGH))
         jv.setOutline("grey")
         jv.draw(win)
         jv.setWidth(2)
     
     for j in range(6):
-        jh=Line(Point(0,300*j+190), Point(T_LEN,300*j+190))
+        jh=Line(Point(0,300*j+190), Point(TABLE_LEN,300*j+190))
         jh.setOutline("grey")
         jh.draw(win)
         jh.setWidth(2)
@@ -236,6 +240,18 @@ if __name__ == '__main__':
                                             [int(Sp[37]), int(Sp[40]), int(Sp[43])], 
                                             [int(Sp[47]), int(Sp[50]), int(Sp[53])], 
                                             [int(Sp[57]), int(Sp[60]), int(Sp[63])]]
+                            for i in range(6):
+                                print(turretInfos[i][0], turretInfos[i][1], turretInfos[i][2])
+                        except:
+                            print("unexpected exception")
+                    elif len(Sp) == 100:
+                        try:
+                            turretInfos = [ [int(Sp[7]),  int(Sp[10]), int(Sp[13])], 
+                                            [int(Sp[17+6]), int(Sp[20+6]), int(Sp[23+6])], 
+                                            [int(Sp[27+12]), int(Sp[30+12]), int(Sp[33+12])], 
+                                            [int(Sp[37+18]), int(Sp[40+18]), int(Sp[43+18])], 
+                                            [int(Sp[47+24]), int(Sp[50+24]), int(Sp[53+24])], 
+                                            [int(Sp[57+30]), int(Sp[60+30]), int(Sp[63+30])]]
                             for i in range(6):
                                 print(turretInfos[i][0], turretInfos[i][1], turretInfos[i][2])
                         except:
@@ -357,9 +373,9 @@ if __name__ == '__main__':
                 b31=1
             
             # drawing
-            L12 = Line(Point(0,b12),Point(T_LEN,b12))
-            L23 = Line(Point(-b23/a23,0),Point((T_HIGH-b23)/a23, T_HIGH))
-            L31 = Line(Point(-b31/a31,0),Point((T_HIGH-b31)/a31, T_HIGH))
+            L12 = Line(Point(0,b12),Point(TABLE_LEN,b12))
+            L23 = Line(Point(-b23/a23,0),Point((TABLE_HIGH-b23)/a23, TABLE_HIGH))
+            L31 = Line(Point(-b31/a31,0),Point((TABLE_HIGH-b31)/a31, TABLE_HIGH))
             L12.draw(win)
             L23.draw(win)
             L31.draw(win)
@@ -376,35 +392,33 @@ if __name__ == '__main__':
             pos.setFill("red")
             pos.draw(win)
             
+            print("main X Y ", X, Y)
+            
             
             
             #calculate BTX angle with mean of 3 BRX viewing angles
-            A1_rel = turretInfos[0][1]
-            A2_rel = turretInfos[1][1]
-            A3_rel = turretInfos[2][1]
-            A1_abs = 0 #declare the vars
+            A1_rel = turretInfos[0][1]/10*2*PI/360
+            A2_rel = turretInfos[1][1]/10*2*PI/360
+            A3_rel = turretInfos[2][1]/10*2*PI/360
+            A1_abs = 0 #declare the vars  #is in rads
             A2_abs = 0
             A3_abs = 0
             
             if R1 !=0 :
-                A1_ = acos((X - DX1)/R1)*360/(2*PI)
-                A1_ = int(A1_*10) #10th Degrees
-                A1_abs = A1_rel + A1_ + 1800            # TODO all 3 Ax_ signs to verify
+                A1_ = acos((X - DX1)/R1)
+                A1_abs = PI - A1_rel - A1_
                 #print("Alpha",A1_)
                 # TODO fail safe
             
             if R2 != 0:
-                A2_ = acos((X - DX2)/R2)*360/(2*PI)
-                A2_ = int(A2_*10) #10th Degrees
-                A2_abs = A2_rel - A2_ + 1800
+                A2_ = acos((X - DX2)/R2)
+                A2_abs = PI - A2_rel + A2_
                 #print("Beta",A2_)
  
             if R3 != 0:
-                A3_ = asin((Y - DY3)/R3)*360/(2*PI)
-                A3_ = int(A3_*10) #10th Degrees
-                A3_abs = A3_rel + A3_
+                A3_ = asin((Y - DY3)/R3)
+                A3_abs = - A3_rel - A3_
                 #print("Gama",A3_)
-                print("This is the wrong one !")
                 
             
             A1_abs = rangeAngle(A1_abs)
@@ -412,29 +426,28 @@ if __name__ == '__main__':
             A3_abs = rangeAngle(A3_abs)
             
             
-            A_abs_bad = (A1_abs + A2_abs + A3_abs) /3
-            xa = (cos(A1_abs*2*PI/3600) + cos(A3_abs*2*PI/3600) + cos(A3_abs*2*PI/3600) )/3
-            ya = (sin(A1_abs*2*PI/3600) + sin(A3_abs*2*PI/3600) + sin(A3_abs*2*PI/3600) )/3
-            A_abs = int(10* atan2(ya, xa)*360/2/PI)
+            xa = (cos(A1_abs) + cos(A3_abs) + cos(A3_abs) )/3
+            ya = (sin(A1_abs) + sin(A3_abs) + sin(A3_abs) )/3
+            A_abs = atan2(ya, xa)
             
             # drawing
-            print("Angles 1 2 3 mean badMean ", A1_abs, A2_abs, A3_abs, A_abs, A_abs_bad)
+            print("Angles 1 2 3 mean ", int(A1_abs*360/2/PI), int(A2_abs*360/2/PI), int(A3_abs*360/2/PI), int(A_abs*360/2/PI))
             #TODO to be confirmed for all
             dir0line.undraw()
-            dir0line = Line(Point(X,Y),Point(X+50*cos(A_abs*2*PI/3600),Y+50*sin(A_abs*2*PI/3600)))
+            dir0line = Line(Point(X,Y),Point(X+100*cos(A_abs),Y+100*sin(A_abs)))
             dir0line.setWidth(5)
             dir0line.setFill("yellow") #TODO check if this could be done only at init (not erased by undraw)
             dir0line.draw(win)
             
             
-            A4_rel = turretInfos[3][1]
-            A5_rel = turretInfos[4][1]
-            A6_rel = turretInfos[5][1]
+            A4_rel = turretInfos[3][1]/10*2*PI/360
+            A5_rel = turretInfos[4][1]/10*2*PI/360
+            A6_rel = turretInfos[5][1]/10*2*PI/360
             
             #calculate distance/angle to opponent, position of opponent
-            A4_abs = A4_rel + A_abs #-3600 not needed
-            R4_dx = int(turretInfos[3][0] * cos(A4_abs/10*2*PI/360))
-            R4_dy = int(turretInfos[3][0] * sin(A4_abs/10*2*PI/360))
+            A4_abs = A4_rel + A_abs 
+            R4_dx = int(turretInfos[3][0] * cos(A4_abs))
+            R4_dy = int(turretInfos[3][0] * sin(A4_abs))
             
             X4 = X + R4_dx
             Y4 = Y + R4_dy
@@ -447,9 +460,9 @@ if __name__ == '__main__':
             pos4.draw(win)
             
             #calculate distance/angle to opponent, position of opponent
-            A5_abs = A5_rel + A_abs #-3600 not needed
-            R5_dx = int(turretInfos[4][0] * cos(A5_abs/10*2*PI/360))
-            R5_dy = int(turretInfos[4][0] * sin(A5_abs/10*2*PI/360))
+            A5_abs = A5_rel + A_abs 
+            R5_dx = int(turretInfos[4][0] * cos(A5_abs))
+            R5_dy = int(turretInfos[4][0] * sin(A5_abs))
             
             X5 = X + R5_dx
             Y5 = Y + R5_dy
@@ -461,9 +474,9 @@ if __name__ == '__main__':
             pos5.draw(win)
             
             #calculate distance/angle to opponent, position of opponent
-            A6_abs = A6_rel + A_abs #-3600 not needed
-            R6_dx = int(turretInfos[5][0] * cos(A6_abs/10*2*PI/360))
-            R6_dy = int(turretInfos[5][0] * sin(A6_abs/10*2*PI/360))
+            A6_abs = A6_rel + A_abs 
+            R6_dx = int(turretInfos[5][0] * cos(A6_abs))
+            R6_dy = int(turretInfos[5][0] * sin(A6_abs))
             
             X6 = X + R6_dx
             Y6 = Y + R6_dy

@@ -38,7 +38,6 @@
 
 // Speed target in Rotation per Second (RPS)
 #define DRUM_MOTOR_SPEED_TARGET_RPS 30
-#warning "33 measured ?"
 
 // -----------------------------------------------------------------------------
 // BEACON COMMUNICATION SYSTEM
@@ -161,13 +160,14 @@ typedef enum {
 
 // Type used to represent a beacon and its associated informations (master side only)
 typedef struct {
-
     uint8_t id           : 4 ; // Equivalent to the board ID
     beacon_state_t state : 4 ; // Beacon current state
     uint16_t timestamp       ; // Last activity timestamp
     uint16_t distance        ; // Relative distance in mm from the turret
     sint16_t angle           ; // Relative angle in 10th of degree relative to the turret
-
+    sint16_t X               ; // Position in mm
+    sint16_t Y               ; // Position in mm
+    sint16_t absAngle        ; // Absolute angle in 10th of degree
 } beacon_info_t ;
 
 // Burst size when sending data during startup procedure

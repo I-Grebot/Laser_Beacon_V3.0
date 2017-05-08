@@ -33,6 +33,8 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 
+void init_trilateration(void);
+void compute_position(void);
 
 #endif	/* TRILATERATION_H */
 

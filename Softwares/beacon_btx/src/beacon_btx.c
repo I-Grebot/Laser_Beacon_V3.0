@@ -212,7 +212,10 @@ int main(void) {
     beacon_can_init();
     
     // init SPI slave
-    beacon_SPI_init();
+    //beacon_SPI_init();
+    
+    // init the trilateration
+    init_trilateration(); //TODO refactor name ...
 
     // Initialize default CAN state
     can_state = CAN_NODE_STATE_BEACON_BTX_IDLE ;
@@ -283,14 +286,20 @@ int main(void) {
                         led_set_green(LED_BLINK_S2);
                         can_state = CAN_NODE_STATE_BEACON_BTX_RUN;
 
+                        compute_position(); //TODO how long does it take ?
+                                
                         uint8_t cnt;
                         for(cnt=0; cnt<BEACON_COM_NB_SLAVE; cnt++)
                         {
-                                printf("[%d] Dist = %4u Angle = %4d Tim. = %4u\n",
+                             
+                                printf("[%d] Dist = %4u Angle = %4d Tim. = %4u AA= %4u X= %4i Y= %4i\n",
                                     beacon_infos[cnt].id ,
                                     beacon_infos[cnt].distance,
                                     beacon_infos[cnt].angle,
-                                    beacon_infos[cnt].timestamp);
+                                    beacon_infos[cnt].timestamp,
+                                    beacon_infos[cnt].absAngle,
+                                    beacon_infos[cnt].X,
+                                    beacon_infos[cnt].Y);
                         }       
                                 printf("Speed %2.2f Control = %2.2fCnt%i\n",
                                     current_speed_rps,
