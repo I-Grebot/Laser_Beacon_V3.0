@@ -107,7 +107,7 @@ def SCI(Ta, Ra, Tb, Rb):
     x=cxc+h*(cyb-cya)/dist
     y=cyc-h*(cxb-cxa)/dist
     res.append([x,y])
-    print("SCI X Y ", x, y)
+    #print("SCI X Y ", x, y)
     
     #there is a 2nd solution
     if dist!=Ra+Rb:
@@ -199,6 +199,11 @@ if __name__ == '__main__':
     pos4=Circle(Point(0,0),1)
     pos5=Circle(Point(0,0),1)
     pos6=Circle(Point(0,0),1)
+    dir0line_emb = Line(Point(0,0), Point(1,1))
+    pos_emb =Circle(Point(0,0),1)
+    pos4_emb=Circle(Point(0,0),1)
+    pos5_emb=Circle(Point(0,0),1)
+    pos6_emb=Circle(Point(0,0),1)
     
     serList = serial.tools.list_ports.comports()
     
@@ -246,12 +251,12 @@ if __name__ == '__main__':
                             print("unexpected exception")
                     elif len(Sp) == 100:
                         try:
-                            turretInfos = [ [int(Sp[7]),  int(Sp[10]), int(Sp[13])], 
-                                            [int(Sp[17+6]), int(Sp[20+6]), int(Sp[23+6])], 
-                                            [int(Sp[27+12]), int(Sp[30+12]), int(Sp[33+12])], 
-                                            [int(Sp[37+18]), int(Sp[40+18]), int(Sp[43+18])], 
-                                            [int(Sp[47+24]), int(Sp[50+24]), int(Sp[53+24])], 
-                                            [int(Sp[57+30]), int(Sp[60+30]), int(Sp[63+30])]]
+                            turretInfos = [ [int(Sp[7]),  int(Sp[10]), int(Sp[13]), int(Sp[15]), int(Sp[17]), int(Sp[19])], 
+                                            [int(Sp[17+6]), int(Sp[20+6]), int(Sp[23+6]), int(Sp[31]), int(Sp[33]), int(Sp[35])], 
+                                            [int(Sp[27+12]), int(Sp[30+12]), int(Sp[33+12]), int(Sp[47]), int(Sp[49]), int(Sp[51])], 
+                                            [int(Sp[37+18]), int(Sp[40+18]), int(Sp[43+18]), int(Sp[63]), int(Sp[65]), int(Sp[67])], 
+                                            [int(Sp[47+24]), int(Sp[50+24]), int(Sp[53+24]), int(Sp[79]), int(Sp[81]), int(Sp[83])], 
+                                            [int(Sp[57+30]), int(Sp[60+30]), int(Sp[63+30]), int(Sp[95]), int(Sp[97]), int(Sp[99])]]
                             for i in range(6):
                                 print(turretInfos[i][0], turretInfos[i][1], turretInfos[i][2])
                         except:
@@ -434,7 +439,7 @@ if __name__ == '__main__':
             print("Angles 1 2 3 mean ", int(A1_abs*360/2/PI), int(A2_abs*360/2/PI), int(A3_abs*360/2/PI), int(A_abs*360/2/PI))
             #TODO to be confirmed for all
             dir0line.undraw()
-            dir0line = Line(Point(X,Y),Point(X+100*cos(A_abs),Y+100*sin(A_abs)))
+            dir0line = Line(Point(X,Y),Point(X+70*cos(A_abs),Y+70*sin(A_abs)))
             dir0line.setWidth(5)
             dir0line.setFill("yellow") #TODO check if this could be done only at init (not erased by undraw)
             dir0line.draw(win)
@@ -487,7 +492,42 @@ if __name__ == '__main__':
             pos6.setFill("deep sky blue")
             pos6.draw(win)
             
+            if len(turretInfos[0])>=6: #this is the embedded calculation
+                X = turretInfos[0][4]
+                Y = turretInfos[0][5]
+                A_abs = turretInfos[0][3]*2*PI/360
+                dir0line_emb.undraw()
+                dir0line_emb = Line(Point(X,Y),Point(X+70*cos(A_abs),Y+70*sin(A_abs)))
+                dir0line_emb.setWidth(2)
+                dir0line_emb.setFill("red") #TODO check if this could be done only at init (not erased by undraw)
+                dir0line_emb.draw(win)
             
+                pos_emb.undraw() 
+                pos_emb = Circle(Point(X,Y),50)
+                pos_emb.setOutline("yellow")
+                pos_emb.draw(win)
+                
+                X = turretInfos[3][4]
+                Y = turretInfos[3][5]
+                pos4_emb.undraw() 
+                pos4_emb = Circle(Point(X,Y),50)
+                pos4_emb.setOutline("yellow")
+                pos4_emb.draw(win)
+                
+                X = turretInfos[4][4]
+                Y = turretInfos[4][5]
+                pos5_emb.undraw() 
+                pos5_emb = Circle(Point(X,Y),50)
+                pos5_emb.setOutline("yellow")
+                pos5_emb.draw(win)
+                
+                X = turretInfos[5][4]
+                Y = turretInfos[5][5]
+                pos6_emb.undraw() 
+                pos6_emb = Circle(Point(X,Y),50)
+                pos6_emb.setOutline("yellow")
+                pos6_emb.draw(win)
+                
             #time.sleep(0.1) #100ms sleep between updates
             #win.flush()
             update()  # update the window as win.autoflush = False

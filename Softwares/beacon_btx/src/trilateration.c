@@ -303,7 +303,7 @@ void compute_position(void)
 
     if(R1 !=0)
     {
-        sint16_t A1_ = acos((beacon_infos[0].X - DX1)/(float)R1); //10th degrees
+        float A1_ = acos((beacon_infos[0].X - DX1)/(float)R1); //10th degrees
         A1_abs = PI - A1_rel - A1_;
         //print("Alpha",A1_)
         // TODO fail safe
@@ -311,31 +311,31 @@ void compute_position(void)
 
     if(R2 != 0)
     {
-        sint16_t A2_ = acos((beacon_infos[0].X - DX2)/(float)R2);
+        float A2_ = acos((beacon_infos[0].X - DX2)/(float)R2);
         A2_abs = PI - A2_rel + A2_;
         //print("Beta",A2_)
     }
 
     if(R3 != 0)
     {
-        sint16_t A3_ = asin((beacon_infos[0].Y - DY3)/(float)R3);
+        float A3_ = asin((beacon_infos[0].Y - DY3)/(float)R3);
         A3_abs = - A3_rel - A3_;
         //print("Gama",A3_)
     }
 
-    A1_abs = rangeAngle(A1_abs);
+    /*A1_abs = rangeAngle(A1_abs);
     A2_abs = rangeAngle(A2_abs);
-    A3_abs = rangeAngle(A3_abs);
+    A3_abs = rangeAngle(A3_abs);*/
 
 
-    sint16_t xa = (cos(A1_abs) + cos(A3_abs) + cos(A3_abs) )/3;
-    sint16_t ya = (sin(A1_abs) + sin(A3_abs) + sin(A3_abs) )/3;
-    A1_abs =  atan2(ya, xa); //in rads
+    float xa = (cos(A1_abs) + cos(A3_abs) + cos(A3_abs) )/3;
+    float ya = (sin(A1_abs) + sin(A3_abs) + sin(A3_abs) )/3;
+    A1_abs =  rangeAngle(atan2(ya, xa)); //in rads
     beacon_infos[0].absAngle = A1_abs*360/(2*PI);
     
-    float A4 = beacon_infos[3].angle*2*PI/3600 + A1_abs; //TODO rangeAngle this
-    float A5 = beacon_infos[4].angle*2*PI/3600 + A1_abs;
-    float A6 = beacon_infos[5].angle*2*PI/3600 + A1_abs;
+    float A4 = rangeAngle(beacon_infos[3].angle*2*PI/3600 + A1_abs);
+    float A5 = rangeAngle(beacon_infos[4].angle*2*PI/3600 + A1_abs);
+    float A6 = rangeAngle(beacon_infos[5].angle*2*PI/3600 + A1_abs);
 
     //calculate distance/angle to opponent, position of opponent
     beacon_infos[3].absAngle = A4*360/(2*PI);
