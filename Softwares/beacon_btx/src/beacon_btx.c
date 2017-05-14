@@ -174,7 +174,6 @@ inline void uart_debug_setup(void) {
 #warning "TODO debug why Rx ISR fires always, code shall work with and without TTL232R"
 
 }
-
 // -----------------------------------------------------------------------------
 // MAIN
 // -----------------------------------------------------------------------------
@@ -212,7 +211,7 @@ int main(void) {
     beacon_can_init();
     
     // init SPI slave
-    //beacon_SPI_init();
+    beacon_SPI_init();
     
     // init the trilateration
     init_trilateration(); //TODO refactor name ...
@@ -287,6 +286,7 @@ int main(void) {
                         can_state = CAN_NODE_STATE_BEACON_BTX_RUN;
 
                         compute_position(); //TODO how long does it take ?
+                        // TODO should be called as often as possible when we receive data
                                 
                         uint8_t cnt;
                         for(cnt=0; cnt<BEACON_COM_NB_SLAVE; cnt++)
@@ -301,16 +301,10 @@ int main(void) {
                                     beacon_infos[cnt].X,
                                     beacon_infos[cnt].Y);
                         }       
-                                printf("Speed %2.2f Control = %2.2fCnt%i\n",
+                                printf("Speed %2.2f Control = %2.2f\n",
                                     current_speed_rps,
-                                    drum_control_rps,isrCnt);
-                                if(SPI2STATbits.SPIRBF)
-                                {
-                                    while(1)
-                                    {
-                                        printf("hell\r\n");
-                                    }
-                                }
+                                    drum_control_rps);
+                               
                     }
 
                     break;

@@ -10,6 +10,7 @@
 #include "trilateration.h"
 #include "board_cfg.h"
 #include "beacon_system.h"
+#include "beacon_SPI.h"
 #include <math.h>
 #include <stddef.h> //for NULL
 #include <dsp.h>
@@ -351,6 +352,28 @@ void compute_position(void)
     beacon_infos[5].absAngle = A6*360/(2*PI);
     beacon_infos[5].X = beacon_infos[0].X + beacon_infos[5].distance * cos(A6);
     beacon_infos[5].Y = beacon_infos[0].Y + beacon_infos[5].distance * sin(A6);
+    
+    
+    beacon_SPI_regs[BEACON_SPI_MAIN_ABS_X_R - BEACON_SPI_STATE_RW] = beacon_infos[0].X;
+    beacon_SPI_regs[BEACON_SPI_MAIN_ABS_Y_R - BEACON_SPI_STATE_RW] = beacon_infos[0].Y;
+    beacon_SPI_regs[BEACON_SPI_MAIN_ABS_A_R - BEACON_SPI_STATE_RW] = beacon_infos[0].absAngle;
+    
+    beacon_SPI_regs[BEACON_SPI_R1_ABS_X_R - BEACON_SPI_STATE_RW] = beacon_infos[3].X;
+    beacon_SPI_regs[BEACON_SPI_R1_ABS_Y_R - BEACON_SPI_STATE_RW] = beacon_infos[3].Y;
+    beacon_SPI_regs[BEACON_SPI_R1_REL_D_R - BEACON_SPI_STATE_RW] = beacon_infos[3].distance;
+    beacon_SPI_regs[BEACON_SPI_R1_REL_A_R - BEACON_SPI_STATE_RW] = beacon_infos[3].angle / 10;
+    
+    beacon_SPI_regs[BEACON_SPI_R2_ABS_X_R - BEACON_SPI_STATE_RW] = beacon_infos[4].X;
+    beacon_SPI_regs[BEACON_SPI_R2_ABS_Y_R - BEACON_SPI_STATE_RW] = beacon_infos[4].Y;
+    beacon_SPI_regs[BEACON_SPI_R2_REL_D_R - BEACON_SPI_STATE_RW] = beacon_infos[4].distance;
+    beacon_SPI_regs[BEACON_SPI_R2_REL_A_R - BEACON_SPI_STATE_RW] = beacon_infos[4].angle / 10;
+    
+    beacon_SPI_regs[BEACON_SPI_R3_ABS_X_R - BEACON_SPI_STATE_RW] = beacon_infos[5].X;
+    beacon_SPI_regs[BEACON_SPI_R3_ABS_Y_R - BEACON_SPI_STATE_RW] = beacon_infos[5].Y;
+    beacon_SPI_regs[BEACON_SPI_R3_REL_D_R - BEACON_SPI_STATE_RW] = beacon_infos[5].distance;
+    beacon_SPI_regs[BEACON_SPI_R3_REL_A_R - BEACON_SPI_STATE_RW] = beacon_infos[5].angle / 10;
+    
+    
 }
 /*    
     0b0001, // Static TOP    beacon

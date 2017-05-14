@@ -35,7 +35,7 @@
 #include "beacon_regs.h"
 #include "board_cfg.h"
 
-extern sint16_t beacon_SPI_regs[BEACON_SPI_T3_R - BEACON_SPI_STATE_RW];
+extern volatile sint16_t beacon_SPI_regs[BEACON_SPI_T3_R - BEACON_SPI_STATE_RW];
 extern volatile uint8_t isrCnt;
 
 

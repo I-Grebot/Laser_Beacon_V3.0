@@ -69,7 +69,7 @@ void can_init(void) {
     ECAN1_TX_RPN      = 0x10         ; // 0x10 : C1TX
     ECAN1_RX_TRIS     = 1            ; // Input
     ECAN1_TX_TRIS     = 0            ; // Output
-    LOCK_PPS
+    //LOCK_PPS // 2 weeks lost for new peripheral mapping because this feature was unknown 
 
     // Switch to configuration mode
     can_set_mode(CAN_MODE_INIT);
